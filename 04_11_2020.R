@@ -117,7 +117,29 @@ gr <- ggplot(tempo, aes(x=year, y=porcentaje, fill=sexo)) +
 ggsave(paste('~/dataScience/graficas', "10.png", sep="/"), plot=gr, width=12, height = 12)
 
 
+#_________________________________
 
+# Boxplots
+tempo <- data %>%
+  group_by(nom_ent, year) %>%
+  summarise(tdes = weighted.mean(tdes, pob))
+
+gr <- ggplot(tempo, aes(x=nom_ent, y=tdes)) +
+  geom_boxplot() +
+  labs(title="Distribucion tasa de desaparecidos por estado", x="Entidad", y="Tasa de desaparecidos") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90))
+ggsave(paste('~/dataScience/graficas', "11.png", sep="/"), plot=gr, width=12, height = 12)
+
+
+tempo$year <- as.character(tempo$year)
+gr <- ggplot(tempo, aes(x=year, y=tdes, fill=year)) +
+  geom_boxplot() +
+  labs(title="Distribucion tasa de desaparecidos por año", x="Año", y="Tasa de desaparecidos", fill="") +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = "bottom")
+ggsave(paste('~/dataScience/graficas', "12.png", sep="/"), plot=gr, width=12, height = 12)
 
 
 
