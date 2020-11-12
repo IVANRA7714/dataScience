@@ -9,7 +9,7 @@ setwd("~")
 # install.packages(c("fpc", 'cluster'))
 library('fpc')
 library('cluster')
-dir1 <- '/home/krax7/ClasesDevf/IDS/7-k-means-b'
+dir1 <- 'dataScience'
 
 ## Leer los datos
 ## Tenemos una muestra (30,000) de perfiles de estudiantes de secundaria en una red social en el 2006
