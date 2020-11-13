@@ -3,6 +3,8 @@ title: "Proyecto Klustera"
 author: "Alejandro Sánchez, Christian de la Torre, Bryan Escamilla e Iván Rodríguez"
 date: "12/11/2020"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -16,9 +18,10 @@ library('C50')
 library(tidyverse)
 
 ```
-Contamos con datos sobre sensores de la empresa Klustera con los siguientes resultados
+#### Contamos con datos sobre sensores de la empresa Klustera con los siguientes resultados
 
-¿Cuántos visitantes por día se tuvo?
+**¿Cuántos visitantes por día se tuvo?**
+
 
 ```{r,echo=FALSE}
 # a) Preparar los datos:
@@ -27,6 +30,9 @@ dir1 <- "/home/rstudio/dataScience/e.csv"
 wbcd <- read.csv(dir1, stringsAsFactors = FALSE)
 wbcd <- wbcd[-1]
 wbcd <- wbcd[-1]
+
+wbcd$day_of_week_tz <- factor(wbcd$day_of_week_tz, levels = c("Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday"), labels = c("1_Monday", "2_Tuesday","3_Wednesday","4_Thursday","5_Friday","6_Saturday","7_Sunday"))
+wbcd$day_of_week_tz <- as.character(wbcd$day_of_week_tz)
 
 tempo <- wbcd %>%
   filter(visitor=="true") %>%
@@ -37,9 +43,72 @@ tempo <- wbcd %>%
 
 # b) Graficar datos
 gr <- ggplot(tempo, aes(x=day_of_week_tz, y=total)) +
-  geom_point()
+  geom_point(color="#4287f5") +
+  geom_text(aes(label=paste(total)), hjust=-.1, vjust=0) +
+  labs(title="Total de visitantes por día de la semana")
 gr
 ```
+
+*Podemos apreciar en la gráfica que el día que más visitantes hubo fue el miércoles.*
+
+**¿Cuántas horas en promedio estuvieron los visitantes por día?**
+
+```{r, echo=FALSE}
+# a) Preparar los datos:
+dir1 <- "/home/rstudio/dataScience/e.csv"
+
+wbcd <- read.csv(dir1, stringsAsFactors = FALSE)
+wbcd <- wbcd[-1]
+wbcd <- wbcd[-1]
+
+wbcd$day_of_week_tz <- factor(wbcd$day_of_week_tz, levels = c("Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday"), labels = c("1_Monday", "2_Tuesday","3_Wednesday","4_Thursday","5_Friday","6_Saturday","7_Sunday"))
+wbcd$day_of_week_tz <- as.character(wbcd$day_of_week_tz)
+
+tempo2 <- wbcd %>%
+  filter(visitor=="true") %>%
+  group_by(day_of_week_tz) %>%
+  mutate(hour_tz=mean(hour_tz))
+  #ungroup()
+
+# b) Graficar datos
+gr2 <- ggplot(tempo2, aes(x=day_of_week_tz, y=hour_tz)) +
+  geom_point(color="#4287f5") +
+  geom_text(aes(label=paste(round(hour_tz, digits = 2))), hjust=-.1, vjust=0) +
+  labs(title="Promedio de horas de visitantes por día de la semana")
+gr2
+```
+
+*Pese a que el miércoles hay más visitantes, el viernes es el día que pasan más tiempo en el evento, por lo que la movilidad de los visitantes es menor.*
+
+**¿Qué día hubo más personas sin importar que sean visitantes o no?**
+
+```{r,echo=FALSE}
+# a) Preparar los datos:
+dir1 <- "/home/rstudio/dataScience/e.csv"
+
+wbcd <- read.csv(dir1, stringsAsFactors = FALSE)
+wbcd <- wbcd[-1]
+wbcd <- wbcd[-1]
+
+wbcd2 <- unite(wbcd, dayM, c(2:3),sep = "/", remove = FALSE)
+wbcd <- data.frame(wbcd2)
+
+tempo3 <- wbcd %>%         
+  group_by(dayM) %>%
+  count() %>%
+  mutate(total_3=n)
+  #ungroup()
+
+# b) Graficar datos
+gr3 <- ggplot(tempo3, aes(x=dayM, y=total_3)) +
+  geom_point(color="#4287f5") +
+  #geom_text(aes(label=paste(round(hour_tz, digits = 2))), hjust=-.1, vjust=0) +
+  labs(title="Personas por día") +
+  theme(axis.text.x = element_text(angle=90))
+gr3
+```
+
+##### **Entrenamiento del Modelo**
 
 ```{r, echo = FALSE}
 
