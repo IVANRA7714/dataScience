@@ -1,18 +1,47 @@
-rm(list=ls())
-setwd("~")
+---
+title: "Proyecto Klustera"
+author: "Alejandro Sánchez, Christian de la Torre, Bryan Escamilla e Iván Rodríguez"
+date: "12/11/2020"
+output: html_document
+---
 
-####################
-# Machine Learning #
-# Decision Trees	 #
-#   			 		     #
-####################
 
-#install.packages(c("C50", "gmodels"))
+```{r setup, include = FALSE}
+#Cargando paquetes
+library(datos)
+library(ggplot2)
+library(dplyr)
+library(gmodels)
+library('C50')
 library(tidyverse)
-library(gmodels) # Herramientas para evaluar árbol de decisión
-library('C50') # Genera el árbol de decisión
 
-#file.choose()
+```
+Contamos con datos sobre sensores de la empresa Klustera con los siguientes resultados
+
+¿Cuántos visitantes por día se tuvo?
+
+```{r,echo=FALSE}
+# a) Preparar los datos:
+dir1 <- "/home/rstudio/dataScience/e.csv"
+
+wbcd <- read.csv(dir1, stringsAsFactors = FALSE)
+wbcd <- wbcd[-1]
+wbcd <- wbcd[-1]
+
+tempo <- wbcd %>%
+  filter(visitor=="true") %>%
+  group_by(day_of_week_tz) %>%
+  count() %>%
+  mutate(total=n)
+  #ungroup()
+
+# b) Graficar datos
+gr <- ggplot(tempo, aes(x=day_of_week_tz, y=total)) +
+  geom_point()
+gr
+```
+
+```{r, echo = FALSE}
 
 dir1 <- "/home/rstudio/dataScience/e.csv"
 
@@ -22,8 +51,7 @@ wbcd <- wbcd[-1]
 #wbcd$day_of_week_tz <- factor(wbcd$day_of_week_tz, levels = c("Monday", "Tuesday", "Wednesday","Thursday","Friday","Saturday","Sunday"), labels = c("1", "2","3","4","5","6","7"))
 #wbcd$day_of_week_tz <- as.integer(wbcd$day_of_week_tz)
 #wbcd <- select(wbcd, branch_office, hour_tz, visitor, tiempodeses)
-as.data.frame(wbcd)
-str(wbcd)
+#as.data.frame(wbcd)
 
 # Generamos una tabla con visitor
 
@@ -32,9 +60,6 @@ str(wbcd)
 #wbcd$visitor <- as.character(wbcd$visitor)
   
 wbcd$visitor <- factor(wbcd$visitor, levels = c("true", "false"), labels = c("Visitante", "No visitante"))
-
-# Transformamos la tabla a porcentajes
-round(prop.table(table(wbcd$visitor)) * 100, digits = 2)
 
 ## Entrenamiento
 # separamos la DB en un set como entrenamiento y otro como prueba
@@ -52,7 +77,6 @@ wbcd_test_labels <- wbcd[-index, 6]
 # Guardamos la clasificación de cada uno (B o M) de la primera columna
 #wbcd_train_labels <- wbcd[1:nfilas, 1]
 #wbcd_test_labels <- wbcd[(nfilas+1):nfilas, 1]
-str(wbcd_train_labels)
 
 # Generando el modelo
 wbcd_model <- C5.0(wbcd_train, wbcd_train_labels)
@@ -67,14 +91,5 @@ wbcd_pred <- predict(wbcd_model, wbcd_test)
 CrossTable(wbcd_test_labels, wbcd_pred,
            prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE)
 
-## ------------- ------------- ------------- ------------- -------------
-# boosts
-# 
-wbcd_boost10_model <- C5.0(wbcd_train, wbcd_train_labels,trials = 10)
-wbcd_boost10_model
-summary(wbcd_boost10_model)
 
-wbcd_boost_pred10 <- predict(wbcd_boost10_model, wbcd_test)
-CrossTable(wbcd_test_labels, wbcd_boost_pred10,
-           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
-           dnn = c('actual', 'predicción'))
+```
